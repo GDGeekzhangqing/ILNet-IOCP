@@ -19,9 +19,9 @@ namespace ILNet_IOCP.Core
         #region 属性
 
         /// <summary>
-        /// 样品的最大连接数设计为同时处理
+        ///设计为同时处理样品的最大连接数
         /// </summary>
-        private int m_numConnections;
+        private int m_numConnections=100;
 
         /// <summary>
         /// 用于每个套接字I/O操作的缓冲区大小
@@ -164,9 +164,9 @@ namespace ILNet_IOCP.Core
                 case SocketAsyncOperation.Receive:
                     ProcessReceive(e);
                     break;
-                case SocketAsyncOperation.Send:
-                    ProcessSendCallBack(e);
-                    break;
+                //case SocketAsyncOperation.Send:
+                //    ProcessSendCallBack(e);
+                //    break;
                 case SocketAsyncOperation.Disconnect:
                     OnDisConnected();
                     break;
@@ -283,6 +283,99 @@ namespace ILNet_IOCP.Core
 
         #region 发送消息
 
+        /// <summary>
+        /// 异步的发送数据
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="data"></param>
+        public void Send(SocketAsyncEventArgs e, byte[] data)
+        {
+            if (e.SocketError == SocketError.Success)
+            {
+                Socket s = e.AcceptSocket;//和客户端关联的socket
+                if (s.Connected)
+                {
+                    Array.Copy(data, 0, e.Buffer, 0, data.Length);//设置发送数据
+
+                    //e.SetBuffer(data, 0, data.Length); //设置发送数据
+                    if (!s.SendAsync(e))//投递发送请求，这个函数有可能同步发送出去，这时返回false，并且不会引发SocketAsyncEventArgs.Completed事件
+                    {
+                        // 同步发送时处理发送完成事件
+                        ProcessSendCallBack(e);
+                    }
+                    else
+                    {
+                        CloseClientSocket(e);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 同步的使用socket发送数据
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="size"></param>
+        /// <param name="timeout"></param>
+        public void Send(Socket socket, byte[] buffer, int offset, int size, int timeout)
+        {
+            socket.SendTimeout = 0;
+            int startTickCount = Environment.TickCount;
+            int sent = 0; // 已经发送了多少字节
+            do
+            {
+                if (Environment.TickCount > startTickCount + timeout)
+                {
+                    //throw new Exception("Timeout.");
+                }
+                try
+                {
+                    sent += socket.Send(buffer, offset + sent, size - sent, SocketFlags.None);
+                }
+                catch (SocketException ex)
+                {
+                    if (ex.SocketErrorCode == SocketError.WouldBlock ||
+                    ex.SocketErrorCode == SocketError.IOPending ||
+                    ex.SocketErrorCode == SocketError.NoBufferSpaceAvailable)
+                    {
+                        // 套接字缓冲区可能已满，请等待并重试
+                        Thread.Sleep(30);
+                    }
+                    else
+                    {
+                        throw ex; // 任何严重的错误发生
+                    }
+                }
+            } while (sent < size);
+        }
+
+        /// <summary>
+        /// 此方法在异步发送操作完成时调用。
+        /// 该方法在套接字上发出另一个receive以读取任何额外的数据
+        /// 从客户机发送的数据
+        /// </summary>
+        /// <param name="e"></param>
+        private void ProcessSendCallBack(SocketAsyncEventArgs e)
+        {
+            if (e.SocketError == SocketError.Success)
+            {
+                // 完成回显数据到客户端
+                AsyncUserToken token = (AsyncUserToken)e.UserToken;
+                // 读取从客户端发送的下一个数据块
+                bool willRaiseEvent = token.Socket.ReceiveAsync(e);
+                if (!willRaiseEvent)
+                {
+                    ProcessReceive(e);
+                }
+            }
+            else
+            {
+                ProcessError(e);
+            }
+        }
+
         public void SendMsg(T msg)
         {
             byte[] data = AnalysisMsg.PackLenInfo(AnalysisMsg.Serialize<T>(msg));
@@ -291,11 +384,16 @@ namespace ILNet_IOCP.Core
 
         public void SendMsg(byte[] data)
         {
+            //AsyncUserToken token = e.UserToken as AsyncUserToken;
             if (data.Length < 65007)
                 listenSocket.SendTo(data,Client.LocalEndPoint);
             else
                 Console.WriteLine("数据太大");
         }
+
+        #endregion
+
+        #region 接收数据
 
         /// <summary>
         /// 此方法在异步接收操作完成时调用。
@@ -338,31 +436,6 @@ namespace ILNet_IOCP.Core
             else
             {
                 CloseClientSocket(e);
-            }
-        }
-
-        /// <summary>
-        /// 此方法在异步发送操作完成时调用。
-        /// 该方法在套接字上发出另一个receive以读取任何额外的数据
-        /// 从客户机发送的数据
-        /// </summary>
-        /// <param name="e"></param>
-        private void ProcessSendCallBack(SocketAsyncEventArgs e)
-        {
-            if (e.SocketError == SocketError.Success)
-            {
-                // 完成回显数据到客户端
-                AsyncUserToken token = (AsyncUserToken)e.UserToken;
-                // 读取从客户端发送的下一个数据块
-                bool willRaiseEvent = token.Socket.ReceiveAsync(e);
-                if (!willRaiseEvent)
-                {
-                    ProcessReceive(e);
-                }
-            }
-            else
-            {
-                ProcessError(e);
             }
         }
 
@@ -460,7 +533,6 @@ namespace ILNet_IOCP.Core
         {
             NetLogger.LogMsg($"客户端{sessionID}离线，离线时间：{DateTime.UtcNow}\t", LogLevel.Info);
         }
-
         #endregion
     }
 }
