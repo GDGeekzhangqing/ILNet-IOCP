@@ -11,3 +11,16 @@ E:\ILNet's IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.csproj.CoreCompile
 E:\ILNet's IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.dll
 E:\ILNet's IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.pdb
 E:\ILNet's IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.genruntimeconfig.cache
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\bin\Debug\netcoreapp3.1\ILNet IOCP.exe
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\bin\Debug\netcoreapp3.1\ILNet IOCP.deps.json
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\bin\Debug\netcoreapp3.1\ILNet IOCP.runtimeconfig.json
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\bin\Debug\netcoreapp3.1\ILNet IOCP.runtimeconfig.dev.json
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\bin\Debug\netcoreapp3.1\ILNet IOCP.dll
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\bin\Debug\netcoreapp3.1\ILNet IOCP.pdb
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.csprojAssemblyReference.cache
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.AssemblyInfoInputs.cache
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.AssemblyInfo.cs
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.csproj.CoreCompileInputs.cache
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.dll
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.pdb
+D:\我的文档\Documents\ILNet-IOCP\ILNet IOCP\obj\Debug\netcoreapp3.1\ILNet IOCP.genruntimeconfig.cache

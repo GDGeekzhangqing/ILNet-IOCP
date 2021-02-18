@@ -8,8 +8,8 @@ namespace ILNet_IOCP
     {
         static void Main(string[] args)
         {
-            IOCPServer IOCPServer = new IOCPServer(10, 1024);
-            IOCPServer.Start(9900);
+            
+           
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ILNet_IOCP.Tools;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -12,9 +14,10 @@ namespace ILNet_IOCP.Core
     // 在接受连接后，从客户端读取所有数据
     // 被发送回客户机。读取和回显到客户机模式
     // 一直持续到客户端断开连接。
-    class IOCPServer
+    public abstract class IOCPServer<T> where T:NetMsg
     {
         #region 属性
+
         /// <summary>
         /// 样品的最大连接数设计为同时处理
         /// </summary>
@@ -40,7 +43,6 @@ namespace ILNet_IOCP.Core
         /// </summary>
         private Socket listenSocket;
 
-
         /// <summary>
         /// 用于写、读和接受套接字操作的可重用SocketAsyncEventArgs对象池
         /// </summary>
@@ -62,6 +64,36 @@ namespace ILNet_IOCP.Core
         private Semaphore m_maxNumberAcceptedClients;
 
         #endregion
+
+        public int sessionID = 0;
+
+        public Socket Client;
+
+        public NetPkg pack = new NetPkg();
+        /// <summary>
+        /// 处理线程待处理的数据队列
+        /// </summary>
+        protected ConcurrentQueue<NetMsg> DataBeProcessed = new ConcurrentQueue<NetMsg>();
+
+        #region 事件
+        /// <summary>
+        /// 首次开启连接的事件
+        /// </summary>
+        public event Action OnConnectEvent;
+
+        /// <summary>
+        /// 接收到数据时的委托事件
+        /// </summary>
+        public event Action<T> OnReciveMsgEvent;
+
+        /// <summary>
+        /// 关闭会话时的委托事件
+        /// </summary>
+        public event Action OnDisConnectEvent;
+
+        #endregion
+
+        #region 初始化
 
         /// <summary>
         /// 创建一个未初始化的服务器实例。
@@ -104,7 +136,7 @@ namespace ILNet_IOCP.Core
             {
                 //预分配一组可重用的SocketAsyncEventArgs
                 readWriteEventArg = new SocketAsyncEventArgs();
-                readWriteEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
+                readWriteEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(IOCP_Completed);
                 readWriteEventArg.UserToken = new AsyncUserToken();
 
                 // 从缓冲池中分配一个字节缓冲区给SocketAsyncEventArg对象
@@ -115,6 +147,38 @@ namespace ILNet_IOCP.Core
             }
         }
 
+
+        /// <summary>
+        /// 此方法在套接字上完成接收或发送操作时调用
+        /// </summary>
+        /// <param name="sender">SocketAsyncEventArg与完成的接收操作相关联</param>
+        /// <param name="e"></param>
+        private void IOCP_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            // 确定刚刚完成的操作类型，并调用关联的处理程序
+            switch (e.LastOperation)
+            {
+                case SocketAsyncOperation.Accept:
+                    OnConnected();
+                    break;
+                case SocketAsyncOperation.Receive:
+                    ProcessReceive(e);
+                    break;
+                case SocketAsyncOperation.Send:
+                    ProcessSendCallBack(e);
+                    break;
+                case SocketAsyncOperation.Disconnect:
+                    OnDisConnected();
+                    break;
+                default:
+                    throw new ArgumentException("在套接字上完成的最后一个操作不是接收或发送");
+            }
+        }
+
+        #endregion
+
+        #region 连接服务器
+
         /// <summary>
         /// 启动正在侦听的服务器
         /// 传入的连接请求。
@@ -122,6 +186,8 @@ namespace ILNet_IOCP.Core
         /// <param name="localEndPoint">服务器将侦听的端点有关的连接请求</param>
         public void Start(Int32 port)
         {
+            Init();
+
             //获得主机相关信息
             IPAddress[] addressList = Dns.GetHostEntry(Environment.MachineName).AddressList;
             IPEndPoint localEndPoint = new IPEndPoint(addressList[addressList.Length - 1], port);
@@ -132,12 +198,12 @@ namespace ILNet_IOCP.Core
             {
                 // 配置监听socket为 dual-mode (IPv4 & IPv6) 
                 // 27相当于下面的winsock代码片段中的IPV6_V6ONLY套接字选项，
-                this.listenSocket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
-                this.listenSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, localEndPoint.Port));
+                listenSocket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
+                listenSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, localEndPoint.Port));
             }
             else
             {
-                this.listenSocket.Bind(localEndPoint);
+                listenSocket.Bind(localEndPoint);
             }
 
             // 启动服务器，监听积压了100个连接
@@ -213,26 +279,22 @@ namespace ILNet_IOCP.Core
             // 接受下一个连接请求
             StartAccept(e);
         }
+        #endregion
 
-        /// <summary>
-        /// 此方法在套接字上完成接收或发送操作时调用
-        /// </summary>
-        /// <param name="sender">SocketAsyncEventArg与完成的接收操作相关联</param>
-        /// <param name="e"></param>
-        private void IO_Completed(object sender, SocketAsyncEventArgs e)
+        #region 发送消息
+
+        public void SendMsg(T msg)
         {
-            // 确定刚刚完成的操作类型，并调用关联的处理程序
-            switch (e.LastOperation)
-            {
-                case SocketAsyncOperation.Receive:
-                    ProcessReceive(e);
-                    break;
-                case SocketAsyncOperation.Send:
-                    ProcessSend(e);
-                    break;
-                default:
-                    throw new ArgumentException("在套接字上完成的最后一个操作不是接收或发送");
-            }
+            byte[] data = AnalysisMsg.PackLenInfo(AnalysisMsg.Serialize<T>(msg));
+            SendMsg(data);
+        }
+
+        public void SendMsg(byte[] data)
+        {
+            if (data.Length < 65007)
+                listenSocket.SendTo(data,Client.LocalEndPoint);
+            else
+                Console.WriteLine("数据太大");
         }
 
         /// <summary>
@@ -254,19 +316,22 @@ namespace ILNet_IOCP.Core
                     Interlocked.Add(ref m_totalBytesRead, e.BytesTransferred);
                     Console.WriteLine("服务器总共读取了{0}字节", m_totalBytesRead);
 
+                    //处理数据
+                    DealWithData(e,s);
+                   
                     //将接收到的数据回传给客户端
-                    e.SetBuffer(e.Offset, e.BytesTransferred);
+                    //e.SetBuffer(e.Offset, e.BytesTransferred);
                     //投递发送请求，这个函数有可能同步发送出去，这时返回false，并且不会引发SocketAsyncEventArgs.Completed事件
-                    bool willRaiseEvent = token.Socket.SendAsync(e);
-                    if (!willRaiseEvent)
-                    {
-                        // 同步发送时处理发送完成事件
-                        ProcessSend(e);
-                    }
+                    //bool willRaiseEvent = token.Socket.SendAsync(e);
+                    //if (!willRaiseEvent)
+                    //{
+                    //    // 同步发送时处理发送完成事件
+                    //    ProcessSendCallBack(e);
+                    //}
                 }
                 else if (!s.ReceiveAsync(e))    //为接收下一段数据，投递接收请求，这个函数有可能同步完成，这时返回false，并且不会引发SocketAsyncEventArgs.Completed事件
                 {
-                    // 同步接收时处理接收完成事件
+                    //同步接收时处理接收完成事件
                     ProcessReceive(e);
                 }
             }
@@ -282,7 +347,7 @@ namespace ILNet_IOCP.Core
         /// 从客户机发送的数据
         /// </summary>
         /// <param name="e"></param>
-        private void ProcessSend(SocketAsyncEventArgs e)
+        private void ProcessSendCallBack(SocketAsyncEventArgs e)
         {
             if (e.SocketError == SocketError.Success)
             {
@@ -314,6 +379,10 @@ namespace ILNet_IOCP.Core
             Console.WriteLine(String.Format("套接字错误 {0}, IP {1}, 操作 {2}。", (Int32)e.SocketError, ip, e.LastOperation));
         }
 
+        #endregion
+
+        #region 关闭连接
+
         /// <summary>
         /// 关闭与客户端的连接
         /// </summary>
@@ -327,7 +396,6 @@ namespace ILNet_IOCP.Core
             {
                 token.Socket.Shutdown(SocketShutdown.Send);
             }
-            // 如果客户端进程已经关闭，则抛出
             catch (Exception)
             {
                 //如果客户端已经关闭，则抛出，因此不需要捕获。
@@ -343,16 +411,56 @@ namespace ILNet_IOCP.Core
             Console.WriteLine("客户端已与服务器断开连接。有{0}客户端连接到服务器", m_numConnectedSockets);
         }
 
-
         /// <summary>
         /// 停止服务
         /// </summary>
         public void Stop()
         {
             this.listenSocket.Close();
-            //mutex.ReleaseMutex();
             m_maxNumberAcceptedClients.Release();
         }
+        #endregion
 
+        /// <summary>
+        /// 处理数据
+        /// </summary>
+        /// <param name="e"></param>
+        public void DealWithData(SocketAsyncEventArgs e,Socket s)
+        {
+            byte[] data = new byte[e.BytesTransferred];
+            T msg = AnalysisMsg.DeSerialize<T>(data);
+            Array.Copy(e.Buffer, e.Offset, data, 0, data.Length);//从e.Buffer块中复制数据出来，保证它可重用
+            OnReciveMsgEvent?.Invoke(msg);
+        }
+
+        #region 事件回调
+
+        /// <summary>
+        /// 连接网络
+        /// </summary>
+        protected virtual void OnConnected()
+        {
+            NetLogger.LogMsg($"客户端{sessionID}上线，上线时间：", LogLevel.Info);
+        }
+
+        /// <summary>
+        /// 接收网络消息
+        /// </summary>
+        /// <param name="msg"></param>
+        protected virtual void OnReciveMsg(T msg)
+        {
+            //更新心跳包    
+            NetLogger.LogMsg($"接收网络消息：{msg}", LogLevel.Info);
+        }
+
+        /// <summary>
+        /// 断开网络连接
+        /// </summary>
+        protected virtual void OnDisConnected()
+        {
+            NetLogger.LogMsg($"客户端{sessionID}离线，离线时间：{DateTime.UtcNow}\t", LogLevel.Info);
+        }
+
+        #endregion
     }
 }

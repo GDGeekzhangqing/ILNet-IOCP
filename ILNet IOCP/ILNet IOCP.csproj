@@ -6,8 +6,4 @@
     <RootNamespace>ILNet_IOCP</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Tools\" />
-  </ItemGroup>
-
 </Project>
