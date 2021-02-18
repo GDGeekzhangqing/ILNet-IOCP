@@ -1,4 +1,6 @@
 ﻿using System;
+using ILNet_IOCP.Core;
+
 
 namespace ILNet_IOCP
 {
@@ -6,7 +8,8 @@ namespace ILNet_IOCP
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            IOCPServer IOCPServer = new IOCPServer(10, 1024);
+            IOCPServer.Start(9900);
         }
     }
 }

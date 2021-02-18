@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\ILNet's IOCP\\ILNet IOCP\\ILNet IOCP.csproj": {}
+    "D:\\我的文档\\Documents\\ILNet-IOCP\\ILNet IOCP\\ILNet IOCP.csproj": {}
   },
   "projects": {
-    "E:\\ILNet's IOCP\\ILNet IOCP\\ILNet IOCP.csproj": {
+    "D:\\我的文档\\Documents\\ILNet-IOCP\\ILNet IOCP\\ILNet IOCP.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\ILNet's IOCP\\ILNet IOCP\\ILNet IOCP.csproj",
+        "projectUniqueName": "D:\\我的文档\\Documents\\ILNet-IOCP\\ILNet IOCP\\ILNet IOCP.csproj",
         "projectName": "ILNet IOCP",
-        "projectPath": "E:\\ILNet's IOCP\\ILNet IOCP\\ILNet IOCP.csproj",
+        "projectPath": "D:\\我的文档\\Documents\\ILNet-IOCP\\ILNet IOCP\\ILNet IOCP.csproj",
         "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "E:\\ILNet's IOCP\\ILNet IOCP\\obj\\",
+        "outputPath": "D:\\我的文档\\Documents\\ILNet-IOCP\\ILNet IOCP\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
