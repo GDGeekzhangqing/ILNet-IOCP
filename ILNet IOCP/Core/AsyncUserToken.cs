@@ -8,7 +8,10 @@ namespace ILNet_IOCP.Core
     class AsyncUserToken
     {
         public Socket Socket;
+        public SocketAsyncEventArgs AsyncEventArgs;
     }
 }
- 
+
+
+
 

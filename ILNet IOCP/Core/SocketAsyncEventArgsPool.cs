@@ -54,5 +54,13 @@ namespace ILNet_IOCP.Core
         {
             get { return m_pool.Count; }
         }
+
+        /// <summary>
+        /// 获取对应的Socket
+        /// </summary>
+        public Socket GetSocket(SocketAsyncEventArgs e)
+        {           
+           return null;
+        }
     }
 }

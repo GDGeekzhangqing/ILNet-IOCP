@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILNet IOCP", "ILNet IOCP.csproj", "{FDA05665-A942-4475-86F8-FD765F7DDC52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ILNet IOCP", "ILNet IOCP.csproj", "{FDA05665-A942-4475-86F8-FD765F7DDC52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IOCPServerTest", "..\IOCPServer\IOCPServerTest.csproj", "{380F0573-4FC0-429E-B528-41D15CED7D12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyClientTest", "..\EasyClientTest\EasyClientTest.csproj", "{AC98B88D-336C-4920-8BBA-1C2C3B1D9330}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{FDA05665-A942-4475-86F8-FD765F7DDC52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDA05665-A942-4475-86F8-FD765F7DDC52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDA05665-A942-4475-86F8-FD765F7DDC52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{380F0573-4FC0-429E-B528-41D15CED7D12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{380F0573-4FC0-429E-B528-41D15CED7D12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{380F0573-4FC0-429E-B528-41D15CED7D12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{380F0573-4FC0-429E-B528-41D15CED7D12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC98B88D-336C-4920-8BBA-1C2C3B1D9330}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC98B88D-336C-4920-8BBA-1C2C3B1D9330}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC98B88D-336C-4920-8BBA-1C2C3B1D9330}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC98B88D-336C-4920-8BBA-1C2C3B1D9330}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

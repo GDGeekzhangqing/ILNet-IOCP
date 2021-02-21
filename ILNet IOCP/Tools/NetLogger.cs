@@ -42,31 +42,31 @@ namespace ILNet_IOCP.Tools
                 }
                 else if (lv == LogLevel.Warn)
                 {
-                    //Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("//--------------------Warn--------------------//");
                     Console.WriteLine(msg);
-                    //Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 else if (lv == LogLevel.Error)
                 {
-                    //Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("//--------------------Error--------------------//");
                     Console.WriteLine(msg);
-                    //Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 else if (lv == LogLevel.Info)
                 {
-                    //Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("//--------------------Info--------------------//");
                     Console.WriteLine(msg);
-                    //Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 else
                 {
-                    //Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("//--------------------Error--------------------//");
                     Console.WriteLine(msg + " >> Unknow Log Type\n");
-                    //Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
             }
         }

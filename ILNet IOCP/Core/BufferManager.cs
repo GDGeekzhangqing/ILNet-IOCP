@@ -11,18 +11,31 @@ namespace ILNet_IOCP.Core
     // 这使得缓冲区易于重用和防范
     // 破碎堆内存。
     // BufferManager类上公开的操作不是线程安全的。
-    class BufferManager
+    public class BufferManager
     {
         /// <summary>
         /// 由缓冲池控制的总字节数
         /// </summary>
         private int m_numBytes;
+
         /// <summary>
         /// 由缓冲区管理器维护的底层字节数组
         /// </summary>
         private byte[] m_buffer;
+
+        /// <summary>
+        /// 偏移位
+        /// </summary>
         private Stack<int> m_freeIndexPool;
+
+        /// <summary>
+        /// 当前偏移位
+        /// </summary>
         private int m_currentIndex;
+
+        /// <summary>
+        /// 缓存大小
+        /// </summary>
         private int m_bufferSize;
 
         public BufferManager(int totalBytes, int bufferSize)
@@ -70,7 +83,7 @@ namespace ILNet_IOCP.Core
         /// 从SocketAsyncEventArg对象中移除缓冲区。
         /// 将缓冲区释放回缓冲池
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">操作对象</param>
         public void FreeBuffer(SocketAsyncEventArgs args)
         {
             m_freeIndexPool.Push(args.Offset);

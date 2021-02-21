@@ -16,7 +16,6 @@ namespace ILNet_IOCP.Core
 
         private readonly object lockObj = new object();
 
-
         /// <summary>
         /// 发送心跳包事件
         /// </summary>
@@ -33,7 +32,6 @@ namespace ILNet_IOCP.Core
         private Dictionary<T, R> connectDic = new Dictionary<T, R>();
 
         public Dictionary<T, R> ConnectDic { get => connectDic; protected set => connectDic = value; }
-
 
 
         public virtual AckMgr<T, R> InitTimerEvent(Action<T> sendHearEvent, Action<T> connectLostEvent, double Checkinterval = 1000, double Sendinterval = 1000)
